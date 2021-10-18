@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Snake.gd" type="Script" id=2]
+[ext_resource path="res://assets/KawaiiIcons_NoBG032.png" type="Texture" id=6]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 26.2125, 21.1281 )
+
+[node name="Snake" type="KinematicBody2D"]
+script = ExtResource( 2 )
+
+[node name="Snek" type="Sprite" parent="."]
+position = Vector2( 150.836, 146.602 )
+texture = ExtResource( 6 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2( 149.777, 149.248 )
+shape = SubResource( 1 )
