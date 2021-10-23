@@ -1,10 +1,11 @@
 extends Node
 
-#onready var lines_vert  = []
-#onready var lines_horiz = []
-
 func _ready():
-	pass
+	print("I'm ready!")
+	$Snake.connect("snake_collide", $Grid, "_on_snake_collide")
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
+func _process(delta):
+	pass
+	#var s = Snake.instance()
+	#print("[", delta, "] Snake at ", s.position, " on cell ", $TileGrid.world_to_map(s.position))
