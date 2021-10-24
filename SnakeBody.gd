@@ -20,11 +20,11 @@ func _process(_delta):
 
 	if prev_tile != cur_tile:
 		if turns.size() > 0 and turns[0].tile == cur_tile:
-			print("turn body at ", position, " on tile ", cur_tile) 
+			#print("turn body at ", position, " on tile ", cur_tile) 
 			var turn = turns.pop_front()
 			velocity = turn.direction
-		else:
-			print("body on tile ", cur_tile, " turns: ", turns)
+		#else:
+			#print("body on tile ", cur_tile, " turns: ", turns)
 		prev_tile = cur_tile
 
 func _physics_process(delta):
@@ -32,4 +32,4 @@ func _physics_process(delta):
 
 func _on_snake_turn(direction, on_tile):
 	turns.push_back({"direction":direction, "tile":on_tile})
-	print("turning at", turns[0], " now on ", on_tile())
+	#print("turning at", turns[0], " now on ", on_tile())
