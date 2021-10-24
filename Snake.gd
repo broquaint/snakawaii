@@ -1,10 +1,12 @@
 extends KinematicBody2D
 
 export (PackedScene) var Grid
+export (PackedScene) var SnakeBody
 
 export (int) var speed = 200
 
 signal snake_collide(node_name)
+signal snake_turn(direction, on_tile)
 
 var velocity_up    = Vector2(0, -200)
 var velocity_down  = Vector2(0, 200)
@@ -13,15 +15,19 @@ var velocity_left  = Vector2(-200, 0)
 
 var velocity = velocity_right
 
+var body_parts = []
+
 var prev_tile: Vector2
 var moves = []
 
 func on_tile():
-	return Grid.instance().get_node("TileGrid").world_to_map(position)
+	# Need to offset because sprit is centered at 0,0
+	var offset_pos = Vector2(position.x + 32, position.y + 32)
+	return Grid.instance().get_node("TileGrid").world_to_map(offset_pos)
 
 func _ready():
 	position.x = 64
-	position.y = 64
+	position.y = 96
 	prev_tile = on_tile()
 
 func get_input():
@@ -42,15 +48,28 @@ func _process(_delta):
 
 	var cur_tile = on_tile()
 	if prev_tile != cur_tile:
-		print("Snake at ", position, " on cell ", cur_tile, " was ", prev_tile) 
+		# print("Snake at ", position, " on cell ", cur_tile, " was ", prev_tile) 
 		if moves.size() > 0:
-			velocity = moves.pop_back()
+			var turn = moves.pop_back()
+			velocity = turn
+			emit_signal("snake_turn", velocity, cur_tile)
 		prev_tile = cur_tile
 
 func _physics_process(delta):
 	var collision = move_and_collide(velocity * delta)
 	if collision:
 		emit_signal("snake_collide", collision.collider.name)
+		match collision.collider.name:
+			"Food":
+				var body_part = SnakeBody.instance()
+				get_tree().get_root().add_child(body_part)
+				body_parts.push_back(body_part)
+				body_part.visible = true
+				body_part.velocity = velocity
+				body_part.position.x = position.x
+				body_part.position.y = (position.y - 64)
+				# print("Snake at ", position.x, "x", position.y, ", body part at ", body_part.position.x, "x", body_part.position.y)
+				connect("snake_turn", body_part, "_on_snake_turn")
 
 func _on_Timer_timeout():
 	pass
