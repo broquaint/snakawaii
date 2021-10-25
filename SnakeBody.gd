@@ -11,20 +11,23 @@ var turns = []
 func _ready():
 	pass # Replace with function body.
 
-func on_tile():
-	var offset_pos = Vector2(position.x + 32, position.y + 32)
-	return Grid.instance().get_node("TileGrid").world_to_map(offset_pos)
+func on_tile(pos) -> Vector2:
+	# Need to offset because sprite is centered at 0,0
+	#var offset_pos = Vector2(floor(pos.x + 32), floor(pos.y + 32))
+	return Vector2(int(floor(pos.x + 31) / 64), int(floor(pos.y + 31) / 64))
 
 func _process(_delta):
-	var cur_tile = on_tile()
+	var cur_tile = on_tile(position)
 
 	if prev_tile != cur_tile:
 		if turns.size() > 0 and turns[0].tile == cur_tile:
-			#print("turn body at ", position, " on tile ", cur_tile) 
+			# print("turn body at ", position, " on tile ", cur_tile) 
 			var turn = turns.pop_front()
+			position.x = stepify(position.x, 32)
+			position.y = stepify(position.y, 32)
 			velocity = turn.direction
-		#else:
-			#print("body on tile ", cur_tile, " turns: ", turns)
+		# else:
+		#	print("body on tile ", cur_tile, " turns: ", turns)
 		prev_tile = cur_tile
 
 func _physics_process(delta):
@@ -32,4 +35,4 @@ func _physics_process(delta):
 
 func _on_snake_turn(direction, on_tile):
 	turns.push_back({"direction":direction, "tile":on_tile})
-	#print("turning at", turns[0], " now on ", on_tile())
+	print("turning at", turns[0], " now on ", on_tile(position))

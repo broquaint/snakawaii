@@ -5,13 +5,14 @@ export (PackedScene) var SnakeBody
 
 export (int) var speed = 200
 
-signal snake_collide(node_name)
+signal snake_collide(node_name, tiles_available)
 signal snake_turn(direction, on_tile)
+signal debug_tile_flip(i, j, state)
 
-var velocity_up    = Vector2(0, -200)
-var velocity_down  = Vector2(0, 200)
-var velocity_right = Vector2(200, 0)
-var velocity_left  = Vector2(-200, 0)
+var velocity_up    = Vector2(0, -150)
+var velocity_down  = Vector2(0, 150)
+var velocity_right = Vector2(150, 0)
+var velocity_left  = Vector2(-150, 0)
 
 var velocity = velocity_right
 
@@ -20,15 +21,15 @@ var body_parts = []
 var prev_tile: Vector2
 var moves = []
 
-func on_tile():
-	# Need to offset because sprit is centered at 0,0
-	var offset_pos = Vector2(position.x + 32, position.y + 32)
-	return Grid.instance().get_node("TileGrid").world_to_map(offset_pos)
+func on_tile(pos) -> Vector2:
+	# Need to offset because sprite is centered at 0,0
+	#var offset_pos = Vector2(floor(pos.x + 32), floor(pos.y + 32))
+	return Vector2(int(floor(pos.x + 31) / 64), int(floor(pos.y + 31) / 64))
 
 func _ready():
-	position.x = 64
-	position.y = 96
-	prev_tile = on_tile()
+	position.x = 63
+	position.y = 95
+	prev_tile = on_tile(position)
 
 func get_input():
 	if Input.is_action_just_pressed("right"):
@@ -46,19 +47,26 @@ func _process(_delta):
 	if new_vel != null:
 		moves.push_back(new_vel)
 
-	var cur_tile = on_tile()
+	var cur_tile = on_tile(position)
 	if prev_tile != cur_tile:
-		# print("Snake at ", position, " on cell ", cur_tile, " was ", prev_tile) 
 		if moves.size() > 0:
 			var turn = moves.pop_back()
 			velocity = turn
+			position.x = stepify(position.x, 32)
+			position.y = stepify(position.y, 32)
 			emit_signal("snake_turn", velocity, cur_tile)
 		prev_tile = cur_tile
+		#print("Snake at ", position, " on cell ", cur_tile, " was ", prev_tile)
+		
+	var tiles = free_tiles()
+	for i in range(0, tiles.size() - 1):
+		for j in range(0, tiles[i].size() - 1):
+			emit_signal("debug_tile_flip", i, j, tiles[i][j])
 
 func _physics_process(delta):
 	var collision = move_and_collide(velocity * delta)
 	if collision:
-		emit_signal("snake_collide", collision.collider.name)
+		emit_signal("snake_collide", collision.collider.name, free_tiles())
 		match collision.collider.name:
 			"Food":
 				var body_part = SnakeBody.instance()
@@ -70,13 +78,26 @@ func _physics_process(delta):
 				# print("Snake at ", position.x, "x", position.y, ", body part at ", body_part.position.x, "x", body_part.position.y)
 				
 				if not body_parts.empty():
-					print("copying turns: ", base.turns)
 					body_part.turns = base.turns.duplicate()
 				body_parts.push_back(body_part)
 				get_tree().get_root().add_child(body_part)
 				body_part.visible = true
 				
 				connect("snake_turn", body_part, "_on_snake_turn")
+
+func free_tiles() -> Array:
+	var all_tiles = []
+	for i in range(0, 10):
+		all_tiles.append(range(0, 16))
+		for j in range(0, 16):
+			all_tiles[i][j] = true
+	
+	var cur_tile = on_tile(position)
+	all_tiles[cur_tile.x][cur_tile.y] = false
+	for bp in body_parts:
+		var tile = on_tile(bp.position)
+		all_tiles[tile.x][tile.y] = false
+	return all_tiles
 
 func _on_Timer_timeout():
 	pass

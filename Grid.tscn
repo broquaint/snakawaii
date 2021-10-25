@@ -27,6 +27,19 @@ extents = Vector2( 32.0261, 31.8582 )
 [node name="Grid" type="Node"]
 script = ExtResource( 4 )
 
+[node name="DebugTile" type="ColorRect" parent="."]
+visible = false
+margin_right = 32.0
+margin_bottom = 32.0
+color = Color( 0.752941, 0.752941, 0.752941, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DebugPos" type="Label" parent="DebugTile"]
+margin_right = 40.0
+margin_bottom = 14.0
+
 [node name="TileGrid" type="TileMap" parent="."]
 visible = false
 tile_set = SubResource( 1 )
