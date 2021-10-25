@@ -32,6 +32,7 @@ func _ready():
 	position.x = 63
 	position.y = 95
 	prev_tile = on_tile(position)
+	connect("snake_collide", self, "_on_collide_add_body_part")
 
 func get_input():
 	if Input.is_action_just_pressed("right"):
@@ -68,24 +69,28 @@ func _process(_delta):
 func _physics_process(delta):
 	var collision = move_and_collide(velocity * delta)
 	if collision:
-		emit_signal("snake_collide", collision.collider.name, free_tiles())
-		match collision.collider.name:
-			"Food":
-				var body_part = SnakeBody.instance()
-				
-				var base = self if body_parts.empty() else body_parts.back()
-				body_part.velocity = base.velocity
-				body_part.position.x = base.position.x + ( 64 if base.velocity == velocity_left else -64 if base.velocity == velocity_right else 0)
-				body_part.position.y = base.position.y + (-64 if base.velocity == velocity_down else 64  if base.velocity == velocity_up else 0)
-				# print("Snake at ", position.x, "x", position.y, ", body part at ", body_part.position.x, "x", body_part.position.y)
-				
-				if not body_parts.empty():
-					body_part.turns = base.turns.duplicate()
-				body_parts.push_back(body_part)
-				get_tree().get_root().add_child(body_part)
-				body_part.visible = true
-				
-				connect("snake_turn", body_part, "_on_snake_turn")
+		emit_signal("snake_collide", collision.collider.name, occupied_tiles)
+
+func _on_collide_add_body_part(part_type, _tiles_available):
+	var body_part
+	match part_type:
+		"Food":
+			body_part = SnakeBody.instance().get_node("BodyPart").duplicate()
+		"Star":
+			body_part = SnakeBody.instance().get_node("StarPart").duplicate()
+	var base = self if body_parts.empty() else body_parts.back()
+	body_part.velocity = base.velocity
+	body_part.position.x = base.position.x + ( 64 if base.velocity == velocity_left else -64 if base.velocity == velocity_right else 0)
+	body_part.position.y = base.position.y + (-64 if base.velocity == velocity_down else 64  if base.velocity == velocity_up else 0)
+	# print("Snake at ", position.x, "x", position.y, ", body part at ", body_part.position.x, "x", body_part.position.y)
+
+	if not body_parts.empty():
+		body_part.turns = base.turns.duplicate()
+	body_parts.push_back(body_part)
+	get_tree().get_root().add_child(body_part)
+	body_part.visible = true
+
+	connect("snake_turn", body_part, "_on_snake_turn")
 
 func free_tiles() -> Array:
 	var all_tiles = []

@@ -1,9 +1,11 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://MovementGrid.gd" type="Script" id=1]
 [ext_resource path="res://assets/KawaiiIcons_NoBG031.png" type="Texture" id=2]
-[ext_resource path="res://assets/KawaiiIcons_NoBG046.png" type="Texture" id=3]
+[ext_resource path="res://assets/KawaiiIcons_NoBG034.png" type="Texture" id=3]
 [ext_resource path="res://Grid.gd" type="Script" id=4]
+[ext_resource path="res://assets/star_hole.png" type="Texture" id=5]
+[ext_resource path="res://assets/KawaiiIcons_NoBG046.png" type="Texture" id=6]
 
 [sub_resource type="TileSet" id=1]
 0/name = "KawaiiIcons_NoBG031.png 0"
@@ -23,6 +25,8 @@
 
 [sub_resource type="RectangleShape2D" id=2]
 extents = Vector2( 32.0261, 31.8582 )
+
+[sub_resource type="RectangleShape2D" id=3]
 
 [node name="Grid" type="Node"]
 script = ExtResource( 4 )
@@ -59,6 +63,7 @@ width = 1.0
 default_color = Color( 0.960784, 1, 0.619608, 1 )
 
 [node name="Food" type="KinematicBody2D" parent="."]
+visible = false
 position = Vector2( 130.32, 24.567 )
 
 [node name="Sprite" type="Sprite" parent="Food"]
@@ -68,3 +73,30 @@ texture = ExtResource( 3 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Food"]
 position = Vector2( 31.8603, 32.2441 )
 shape = SubResource( 2 )
+
+[node name="Star" type="KinematicBody2D" parent="."]
+visible = false
+position = Vector2( -38.1003, 41.0468 )
+
+[node name="Sprite" type="Sprite" parent="Star"]
+position = Vector2( 31.692, 32.2353 )
+texture = ExtResource( 6 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Star"]
+position = Vector2( 31.8603, 32.2441 )
+shape = SubResource( 2 )
+
+[node name="StarSlot" type="StaticBody2D" parent="."]
+position = Vector2( 42.7389, 24.567 )
+
+[node name="Sprite" type="Sprite" parent="StarSlot"]
+position = Vector2( 32, 32 )
+texture = ExtResource( 5 )
+flip_h = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StarSlot"]
+position = Vector2( 31.3073, 34.3551 )
+shape = SubResource( 3 )
+__meta__ = {
+"_edit_group_": true
+}
