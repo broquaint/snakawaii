@@ -21,6 +21,8 @@ var body_parts = []
 var prev_tile: Vector2
 var moves = []
 
+onready var occupied_tiles = free_tiles()
+
 func on_tile(pos) -> Vector2:
 	# Need to offset because sprite is centered at 0,0
 	#var offset_pos = Vector2(floor(pos.x + 32), floor(pos.y + 32))
@@ -49,6 +51,7 @@ func _process(_delta):
 
 	var cur_tile = on_tile(position)
 	if prev_tile != cur_tile:
+		occupied_tiles = free_tiles()
 		if moves.size() > 0:
 			var turn = moves.pop_back()
 			velocity = turn
@@ -58,10 +61,9 @@ func _process(_delta):
 		prev_tile = cur_tile
 		#print("Snake at ", position, " on cell ", cur_tile, " was ", prev_tile)
 		
-	var tiles = free_tiles()
-	for i in range(0, tiles.size() - 1):
-		for j in range(0, tiles[i].size() - 1):
-			emit_signal("debug_tile_flip", i, j, tiles[i][j])
+	for i in range(0, occupied_tiles.size() - 1):
+		for j in range(0, occupied_tiles[i].size() - 1):
+			emit_signal("debug_tile_flip", i, j, occupied_tiles[i][j])
 
 func _physics_process(delta):
 	var collision = move_and_collide(velocity * delta)

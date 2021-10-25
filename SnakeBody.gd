@@ -35,4 +35,4 @@ func _physics_process(delta):
 
 func _on_snake_turn(direction, on_tile):
 	turns.push_back({"direction":direction, "tile":on_tile})
-	print("turning at", turns[0], " now on ", on_tile(position))
+	# print("turning at", turns[0], " now on ", on_tile(position))
