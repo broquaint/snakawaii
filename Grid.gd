@@ -1,12 +1,14 @@
 extends Node
 
 signal grid_star_slot()
+signal grid_chop_slot()
 
 var debug_tiles = []
 
 func _ready():
 	_set_item_position($Food, [], $TileGrid.map_to_world(Vector2(5,3)))
 	$StarSlot.position = $TileGrid.map_to_world(Vector2(1,7))
+	$ChopSlot.position = $TileGrid.map_to_world(Vector2(1,2))
 	
 	for i in range(0, 10):
 		debug_tiles.append(range(0, 16))
@@ -56,3 +58,5 @@ func _on_snake_collide(node_name, tiles_available):
 func _on_snake_tile_change(snake):
 	if snake.new_tile == Vector2(1,7):
 		emit_signal("grid_star_slot")
+	elif snake.new_tile == Vector2(1,2):
+		emit_signal("grid_chop_slot")

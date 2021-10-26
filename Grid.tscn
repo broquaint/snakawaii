@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://MovementGrid.gd" type="Script" id=1]
 [ext_resource path="res://assets/KawaiiIcons_NoBG031.png" type="Texture" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://Grid.gd" type="Script" id=4]
 [ext_resource path="res://assets/star_hole.png" type="Texture" id=5]
 [ext_resource path="res://assets/KawaiiIcons_NoBG046.png" type="Texture" id=6]
+[ext_resource path="res://assets/KawaiiIcons_NoBG003.png" type="Texture" id=7]
 
 [sub_resource type="TileSet" id=1]
 0/name = "KawaiiIcons_NoBG031.png 0"
@@ -89,3 +90,8 @@ position = Vector2( -63.9815, 0 )
 texture = ExtResource( 5 )
 offset = Vector2( 32, 32 )
 flip_h = true
+
+[node name="ChopSlot" type="Sprite" parent="."]
+position = Vector2( -68.5246, 73.2909 )
+texture = ExtResource( 7 )
+offset = Vector2( 32, 32 )

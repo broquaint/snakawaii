@@ -138,6 +138,28 @@ func _on_grid_star_slot():
 
 	body_parts = new_parts
 
+func _on_grid_chop_slot():
+	var new_parts = []
+	for idx in range(body_parts.size()):
+		var part = body_parts[idx]
+		if idx >= floor(body_parts.size() / 2):
+			new_parts.append(part.duplicate())
+
+	for idx in range(new_parts.size()):
+		var np = new_parts[idx]
+		var op = body_parts[idx]
+		np.velocity = op.velocity
+		np.position = op.position
+		np.turns    = op.turns.duplicate()
+		connect("snake_turn", np, "_on_snake_turn")
+
+	for part in body_parts:
+		part.free()
+	for part in new_parts:
+		get_tree().get_root().add_child(part)
+
+	body_parts = new_parts
+
 func make_stats():
 	var body_part_count = 0
 	var star_part_count = 0
