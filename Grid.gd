@@ -53,6 +53,6 @@ func _on_snake_collide(node_name, tiles_available):
 			# emit_signal("star_collected")
 	spawn_next_item(tiles_available)
 
-func _on_snake_tile_change(new_tile, _old_tile):
-	if new_tile == Vector2(1,7):
+func _on_snake_tile_change(snake):
+	if snake.new_tile == Vector2(1,7):
 		emit_signal("grid_star_slot")

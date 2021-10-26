@@ -22,6 +22,10 @@ var body_parts = []
 var prev_tile: Vector2
 var moves = []
 
+var state = {
+	tiles_seen = 0,
+}
+
 onready var occupied_tiles = free_tiles()
 
 func on_tile(pos) -> Vector2:
@@ -59,7 +63,12 @@ func _process(_delta):
 			position.x = stepify(position.x, 32)
 			position.y = stepify(position.y, 32)
 			emit_signal("snake_turn", velocity, cur_tile)
-		emit_signal("snake_tile_change", cur_tile, prev_tile)
+		
+		state.tiles_seen += 1
+		emit_signal("snake_tile_change", {
+			new_tile = cur_tile,
+			stats = make_stats()
+		})
 		prev_tile = cur_tile
 		#print("Snake at ", position, " on cell ", cur_tile, " was ", prev_tile)
 		
@@ -128,6 +137,21 @@ func _on_grid_star_slot():
 		get_tree().get_root().add_child(part)
 
 	body_parts = new_parts
+
+func make_stats():
+	var body_part_count = 0
+	var star_part_count = 0
+	for idx in range(body_parts.size()):
+		var part = body_parts[idx]
+		if "StarPart".is_subsequence_of(part.name):
+			star_part_count += 1
+		else:
+			body_part_count += 1
+	return {
+		star_part_count = star_part_count,
+		body_part_count = body_part_count,
+		tiles_seen = state.tiles_seen,
+	}
 
 func _on_Timer_timeout():
 	pass
