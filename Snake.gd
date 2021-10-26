@@ -7,6 +7,7 @@ export (int) var speed = 200
 
 signal snake_collide(node_name, tiles_available)
 signal snake_turn(direction, on_tile)
+signal snake_tile_change(new_tile, old_tile)
 signal debug_tile_flip(i, j, state)
 
 var velocity_up    = Vector2(0, -150)
@@ -25,7 +26,6 @@ onready var occupied_tiles = free_tiles()
 
 func on_tile(pos) -> Vector2:
 	# Need to offset because sprite is centered at 0,0
-	#var offset_pos = Vector2(floor(pos.x + 32), floor(pos.y + 32))
 	return Vector2(int(floor(pos.x + 31) / 64), int(floor(pos.y + 31) / 64))
 
 func _ready():
@@ -59,6 +59,7 @@ func _process(_delta):
 			position.x = stepify(position.x, 32)
 			position.y = stepify(position.y, 32)
 			emit_signal("snake_turn", velocity, cur_tile)
+		emit_signal("snake_tile_change", cur_tile, prev_tile)
 		prev_tile = cur_tile
 		#print("Snake at ", position, " on cell ", cur_tile, " was ", prev_tile)
 		
@@ -105,6 +106,28 @@ func free_tiles() -> Array:
 		var tile = on_tile(bp.position)
 		all_tiles[tile.x][tile.y] = false
 	return all_tiles
+
+func _on_grid_star_slot():
+	var new_parts = []
+	for idx in range(body_parts.size()):
+		var part = body_parts[idx]
+		if not "StarPart".is_subsequence_of(part.name):
+			new_parts.append(part.duplicate())
+
+	for idx in range(new_parts.size()):
+		var np = new_parts[idx]
+		var op = body_parts[idx]
+		np.velocity = op.velocity
+		np.position = op.position
+		np.turns    = op.turns.duplicate()
+		connect("snake_turn", np, "_on_snake_turn")
+
+	for part in body_parts:
+		part.free()
+	for part in new_parts:
+		get_tree().get_root().add_child(part)
+
+	body_parts = new_parts
 
 func _on_Timer_timeout():
 	pass

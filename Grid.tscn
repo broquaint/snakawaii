@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://MovementGrid.gd" type="Script" id=1]
 [ext_resource path="res://assets/KawaiiIcons_NoBG031.png" type="Texture" id=2]
@@ -25,8 +25,6 @@
 
 [sub_resource type="RectangleShape2D" id=2]
 extents = Vector2( 32.0261, 31.8582 )
-
-[sub_resource type="RectangleShape2D" id=3]
 
 [node name="Grid" type="Node"]
 script = ExtResource( 4 )
@@ -86,17 +84,8 @@ texture = ExtResource( 6 )
 position = Vector2( 31.8603, 32.2441 )
 shape = SubResource( 2 )
 
-[node name="StarSlot" type="StaticBody2D" parent="."]
-position = Vector2( 42.7389, 24.567 )
-
-[node name="Sprite" type="Sprite" parent="StarSlot"]
-position = Vector2( 32, 32 )
+[node name="StarSlot" type="Sprite" parent="."]
+position = Vector2( -63.9815, 0 )
 texture = ExtResource( 5 )
+offset = Vector2( 32, 32 )
 flip_h = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="StarSlot"]
-position = Vector2( 31.3073, 34.3551 )
-shape = SubResource( 3 )
-__meta__ = {
-"_edit_group_": true
-}

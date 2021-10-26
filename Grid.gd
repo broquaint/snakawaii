@@ -1,5 +1,7 @@
 extends Node
 
+signal grid_star_slot()
+
 var debug_tiles = []
 
 func _ready():
@@ -50,6 +52,7 @@ func _on_snake_collide(node_name, tiles_available):
 			$Star.position = Vector2(-128,-128)
 			# emit_signal("star_collected")
 	spawn_next_item(tiles_available)
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
+
+func _on_snake_tile_change(new_tile, _old_tile):
+	if new_tile == Vector2(1,7):
+		emit_signal("grid_star_slot")
