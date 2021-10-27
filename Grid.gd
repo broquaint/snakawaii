@@ -13,6 +13,7 @@ func _ready():
 	$StarSlot.position = $TileGrid.map_to_world(Vector2(1,7))
 	$ChopSlot.position = $TileGrid.map_to_world(Vector2(1,2))
 	
+	$StarTimer.connect("timeout", self, "_on_star_timeout")
 	for i in range(0, 10):
 		debug_tiles.append(range(0, 16))
 		for j in range(0, 16):
@@ -56,6 +57,7 @@ func _on_snake_collide(p):
 			move_item($Food, p.tiles_available)
 		"Star":
 			move_item($Star, p.tiles_available)
+			$StarTimer.start()
 		"Rainbow":
 			# If we reach here then this is the 3rd rainbow item
 			# but it hasn't been added to the snake yet.
@@ -64,6 +66,7 @@ func _on_snake_collide(p):
 	if not $Star.visible:
 		$Star.visible = true
 		move_item($Star, p.tiles_available)
+		$StarTimer.start()
 	if collected % 3 == 0:
 		move_item($Rainbow, p.tiles_available)
 	else:
@@ -76,3 +79,7 @@ func _on_snake_tile_change(snake):
 		emit_signal("grid_chop_slot")
 	elif snake.new_tile == Vector2(4, 1) and snake.stats.rainbow_part_count >= 3:
 		emit_signal("grid_exit_slot")
+
+func _on_star_timeout():
+	$Star.position = Vector2(-128,-128)
+	$Star.visible = false
