@@ -2,6 +2,7 @@ extends Node
 
 signal grid_star_slot()
 signal grid_chop_slot()
+signal grid_exit_slot()
 
 var debug_tiles = []
 
@@ -43,33 +44,35 @@ func _set_item_position(node, tiles_available, spawn_at = Vector2.ZERO):
 	node.visible = true
 	return item_tile
 
-func spawn_next_item(tiles_available):
+func move_item(node, tiles_available):
+	var tile = _set_item_position(node, tiles_available)
+	# This doesn't work not least because tiles_available is generated from scratch >_<
+	tiles_available[tile.x][tile.y] = false
+
+func _on_snake_collide(p):
 	collected += 1
-	var food_tile = _set_item_position($Food, tiles_available)
-	tiles_available[food_tile.x][food_tile.y] = true
-	var star_tile = _set_item_position($Star, tiles_available)
-	tiles_available[star_tile.x][star_tile.y] = true
+	match p.collided_with:
+		"Food":
+			move_item($Food, p.tiles_available)
+		"Star":
+			move_item($Star, p.tiles_available)
+		"Rainbow":
+			# If we reach here then this is the 3rd rainbow item
+			# but it hasn't been added to the snake yet.
+			if p.state.rainbow_part_count >= 2:
+				$Exit.position = $TileGrid.map_to_world(Vector2(4, 1))
+	if not $Star.visible:
+		$Star.visible = true
+		move_item($Star, p.tiles_available)
 	if collected % 3 == 0:
-		var key_tile = _set_item_position($Rainbow, tiles_available)
-		tiles_available[key_tile.x][key_tile.y] = true
+		move_item($Rainbow, p.tiles_available)
 	else:
 		$Rainbow.position = Vector2(-64, -128)
-
-func _on_snake_collide(node_name, tiles_available):
-	print("collided with: ", node_name)
-	match node_name:
-		"Food":
-			$Food.visible = false
-			$Food.position = Vector2(-128,-128)
-			# emit_signal("food_collected")
-		"Star":
-			$Star.visible = false
-			$Star.position = Vector2(-128,-128)
-			# emit_signal("star_collected")
-	spawn_next_item(tiles_available)
 
 func _on_snake_tile_change(snake):
 	if snake.new_tile == Vector2(1,7):
 		emit_signal("grid_star_slot")
 	elif snake.new_tile == Vector2(1,2):
 		emit_signal("grid_chop_slot")
+	elif snake.new_tile == Vector2(4, 1) and snake.stats.rainbow_part_count >= 3:
+		emit_signal("grid_exit_slot")

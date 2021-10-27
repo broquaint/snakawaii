@@ -24,6 +24,7 @@ var moves = []
 
 var state = {
 	tiles_seen = 0,
+	tiles_entered = []
 }
 
 onready var occupied_tiles = free_tiles()
@@ -70,6 +71,7 @@ func _process(_delta):
 			stats = make_stats()
 		})
 		prev_tile = cur_tile
+		state.tiles_entered.push_front(cur_tile)
 		#print("Snake at ", position, " on cell ", cur_tile, " was ", prev_tile)
 		
 	for i in range(0, occupied_tiles.size() - 1):
@@ -79,14 +81,16 @@ func _process(_delta):
 func _physics_process(delta):
 	var collision = move_and_collide(velocity * (delta + 0.1), true, true, true)
 	if collision:
-		emit_signal("snake_collide", collision.collider.name, occupied_tiles)
-		move_and_slide(velocity)
-	else:
-		move_and_collide(velocity * delta)
+		emit_signal("snake_collide", {
+			collided_with = collision.collider.name,
+			tiles_available = occupied_tiles,
+			state = make_stats()
+		})
+	move_and_collide(velocity * delta)
 
-func _on_collide_add_body_part(part_type, _tiles_available):
+func _on_collide_add_body_part(p):
 	var body_part
-	match part_type:
+	match p.collided_with:
 		"Food":
 			body_part = SnakeBody.instance().get_node("BodyPart").duplicate()
 		"Star":
@@ -106,20 +110,6 @@ func _on_collide_add_body_part(part_type, _tiles_available):
 	body_part.visible = true
 
 	connect("snake_turn", body_part, "_on_snake_turn")
-
-func free_tiles() -> Array:
-	var all_tiles = []
-	for i in range(0, 10):
-		all_tiles.append(range(0, 16))
-		for j in range(0, 16):
-			all_tiles[i][j] = true
-	
-	var cur_tile = on_tile(position)
-	all_tiles[cur_tile.x][cur_tile.y] = false
-	for bp in body_parts:
-		var tile = on_tile(bp.position)
-		all_tiles[tile.x][tile.y] = false
-	return all_tiles
 
 func _on_grid_star_slot():
 	var new_parts = []
@@ -174,19 +164,45 @@ func _on_grid_chop_slot():
 
 	body_parts = new_parts
 
+func _on_grid_exit_slot():
+	print("Exit level code goes here \\o/")
+
+func free_tiles() -> Array:
+	var all_tiles = []
+	for i in range(0, 10):
+		all_tiles.append(range(0, 16))
+		for j in range(0, 16):
+			all_tiles[i][j] = true
+
+	var cur_tile = on_tile(position)
+	all_tiles[cur_tile.x][cur_tile.y] = false
+
+	var on_tiles = state.tiles_entered.slice(0, body_parts.size())
+	for tile in on_tiles:
+		all_tiles[tile.x][tile.y] = false
+
+	# Possible early optimization
+	state.tiles_entered.resize(body_parts.size()*2)
+
+	return all_tiles
+
 func make_stats():
 	var body_part_count = 0
 	var star_part_count = 0
+	var rainbow_part_count = 0
 	for idx in range(body_parts.size()):
 		var part = body_parts[idx]
 		if is_part(part, "Star"):
 			star_part_count += 1
 		elif is_part(part, "Body"):
 			body_part_count += 1
-		# Don't consider keys as part of the score
+		elif is_part(part, "Rainbow"):
+			rainbow_part_count += 1
+
 	return {
 		star_part_count = star_part_count,
 		body_part_count = body_part_count,
+		rainbow_part_count = rainbow_part_count,
 		tiles_seen = state.tiles_seen,
 	}
 
