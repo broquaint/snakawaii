@@ -77,9 +77,12 @@ func _process(_delta):
 			emit_signal("debug_tile_flip", i, j, occupied_tiles[i][j])
 
 func _physics_process(delta):
-	var collision = move_and_collide(velocity * delta)
+	var collision = move_and_collide(velocity * (delta + 0.1), true, true, true)
 	if collision:
 		emit_signal("snake_collide", collision.collider.name, occupied_tiles)
+		move_and_slide(velocity)
+	else:
+		move_and_collide(velocity * delta)
 
 func _on_collide_add_body_part(part_type, _tiles_available):
 	var body_part
