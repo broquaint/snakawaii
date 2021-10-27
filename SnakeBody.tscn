@@ -4,13 +4,17 @@
 [ext_resource path="res://SnakeBody.gd" type="Script" id=2]
 [ext_resource path="res://BodyPart.gd" type="Script" id=3]
 [ext_resource path="res://assets/star_body_part.png" type="Texture" id=4]
-[ext_resource path="res://StarPart.gd" type="Script" id=5]
+[ext_resource path="res://assets/KawaiiIcons_NoBG024.png" type="Texture" id=5]
 
-[sub_resource type="RectangleShape2D" id=2]
+[sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 10, 6.16081 )
 
 [node name="SnakeBody" type="KinematicBody2D"]
 script = ExtResource( 2 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2( 0.235001, 6.34494 )
+shape = SubResource( 1 )
 
 [node name="BodyPart" type="KinematicBody2D" parent="."]
 visible = false
@@ -21,19 +25,27 @@ texture = ExtResource( 1 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="BodyPart"]
 position = Vector2( 0.235001, 6.34494 )
-shape = SubResource( 2 )
+shape = SubResource( 1 )
 
 [node name="StarPart" type="KinematicBody2D" parent="."]
 visible = false
-script = ExtResource( 5 )
+script = ExtResource( 3 )
 
 [node name="Sprite" type="Sprite" parent="StarPart"]
 texture = ExtResource( 4 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StarPart"]
 position = Vector2( 0.235001, 6.34494 )
-shape = SubResource( 2 )
+shape = SubResource( 1 )
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="RainbowPart" type="KinematicBody2D" parent="."]
+visible = false
+script = ExtResource( 3 )
+
+[node name="Sprite" type="Sprite" parent="RainbowPart"]
+scale = Vector2( 0.9, 0.9 )
+texture = ExtResource( 5 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RainbowPart"]
 position = Vector2( 0.235001, 6.34494 )
-shape = SubResource( 2 )
+shape = SubResource( 1 )

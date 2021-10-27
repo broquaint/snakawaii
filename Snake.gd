@@ -91,6 +91,8 @@ func _on_collide_add_body_part(part_type, _tiles_available):
 			body_part = SnakeBody.instance().get_node("BodyPart").duplicate()
 		"Star":
 			body_part = SnakeBody.instance().get_node("StarPart").duplicate()
+		"Rainbow":
+			body_part = SnakeBody.instance().get_node("RainbowPart").duplicate()
 	var base = self if body_parts.empty() else body_parts.back()
 	body_part.velocity = base.velocity
 	body_part.position.x = base.position.x + ( 64 if base.velocity == velocity_left else -64 if base.velocity == velocity_right else 0)
@@ -123,7 +125,7 @@ func _on_grid_star_slot():
 	var new_parts = []
 	for idx in range(body_parts.size()):
 		var part = body_parts[idx]
-		if not "StarPart".is_subsequence_of(part.name):
+		if not is_part(part, "Star"):
 			new_parts.append(part.duplicate())
 
 	for idx in range(new_parts.size()):
@@ -142,11 +144,20 @@ func _on_grid_star_slot():
 	body_parts = new_parts
 
 func _on_grid_chop_slot():
+	var choppable_count = 0
+	for part in body_parts:
+		if not is_part(part, "Rainbow"):
+			choppable_count += 1
 	var new_parts = []
-	for idx in range(body_parts.size()):
-		var part = body_parts[idx]
-		if idx >= floor(body_parts.size() / 2):
+	var parts_seen = 0
+	for part in body_parts:
+		if is_part(part, "Rainbow"):
 			new_parts.append(part.duplicate())
+		else:
+			# Drop about half the parts.
+			if not(parts_seen >= float(floor(choppable_count / 2))): 
+				new_parts.append(part.duplicate())
+			parts_seen += 1
 
 	for idx in range(new_parts.size()):
 		var np = new_parts[idx]
@@ -168,10 +179,11 @@ func make_stats():
 	var star_part_count = 0
 	for idx in range(body_parts.size()):
 		var part = body_parts[idx]
-		if "StarPart".is_subsequence_of(part.name):
+		if is_part(part, "Star"):
 			star_part_count += 1
-		else:
+		elif is_part(part, "Body"):
 			body_part_count += 1
+		# Don't consider keys as part of the score
 	return {
 		star_part_count = star_part_count,
 		body_part_count = body_part_count,
@@ -180,3 +192,6 @@ func make_stats():
 
 func _on_Timer_timeout():
 	pass
+
+func is_part(part, part_name):
+	return part_name.is_subsequence_of(part.name)

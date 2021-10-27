@@ -5,6 +5,8 @@ signal grid_chop_slot()
 
 var debug_tiles = []
 
+var collected = 0
+
 func _ready():
 	_set_item_position($Food, [], $TileGrid.map_to_world(Vector2(5,3)))
 	$StarSlot.position = $TileGrid.map_to_world(Vector2(1,7))
@@ -28,19 +30,30 @@ func _on_debug_tile_flip(i, j, state):
 
 func _set_item_position(node, tiles_available, spawn_at = Vector2.ZERO):
 	var new_pos = spawn_at
+	var item_tile = Vector2.ZERO
 	while not new_pos:
 		var new_x = randi() % 8 + 1
 		var new_y = randi() % 8 + 1
 
 		if tiles_available[new_x][new_y]:
-			new_pos = $TileGrid.map_to_world(Vector2(new_x, new_y))
+			item_tile = Vector2(new_x, new_y)
+			new_pos = $TileGrid.map_to_world(item_tile)
 			break
 	node.position = new_pos
 	node.visible = true
-	print("Setting ", node, " at ", new_pos)
+	return item_tile
 
 func spawn_next_item(tiles_available):
-	_set_item_position($Food if randi() % 2 == 0 else $Star, tiles_available)
+	collected += 1
+	var food_tile = _set_item_position($Food, tiles_available)
+	tiles_available[food_tile.x][food_tile.y] = true
+	var star_tile = _set_item_position($Star, tiles_available)
+	tiles_available[star_tile.x][star_tile.y] = true
+	if collected % 3 == 0:
+		var key_tile = _set_item_position($Rainbow, tiles_available)
+		tiles_available[key_tile.x][key_tile.y] = true
+	else:
+		$Rainbow.position = Vector2(-64, -128)
 
 func _on_snake_collide(node_name, tiles_available):
 	print("collided with: ", node_name)

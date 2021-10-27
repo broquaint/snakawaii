@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://MovementGrid.gd" type="Script" id=1]
 [ext_resource path="res://assets/KawaiiIcons_NoBG031.png" type="Texture" id=2]
@@ -7,6 +7,7 @@
 [ext_resource path="res://assets/star_hole.png" type="Texture" id=5]
 [ext_resource path="res://assets/KawaiiIcons_NoBG046.png" type="Texture" id=6]
 [ext_resource path="res://assets/KawaiiIcons_NoBG003.png" type="Texture" id=7]
+[ext_resource path="res://assets/KawaiiIcons_NoBG024.png" type="Texture" id=8]
 
 [sub_resource type="TileSet" id=1]
 0/name = "KawaiiIcons_NoBG031.png 0"
@@ -84,6 +85,21 @@ texture = ExtResource( 6 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Star"]
 position = Vector2( 31.8603, 32.2441 )
 shape = SubResource( 2 )
+
+[node name="Rainbow" type="KinematicBody2D" parent="."]
+position = Vector2( -76.1662, 161.575 )
+
+[node name="Sprite" type="Sprite" parent="Rainbow"]
+position = Vector2( 32.0786, 31.8689 )
+scale = Vector2( 0.9, 0.9 )
+texture = ExtResource( 8 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Rainbow"]
+position = Vector2( 31.8603, 32.2441 )
+shape = SubResource( 2 )
+__meta__ = {
+"_edit_group_": true
+}
 
 [node name="StarSlot" type="Sprite" parent="."]
 position = Vector2( -63.9815, 0 )
