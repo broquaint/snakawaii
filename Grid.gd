@@ -3,13 +3,15 @@ extends Node
 signal grid_star_slot()
 signal grid_chop_slot()
 signal grid_exit_slot()
+signal item_tile_occupied(tile)
+signal item_tile_available(tile)
 
 var debug_tiles = []
 
 var collected = 0
 
 func _ready():
-	_set_item_position($Food, [], $TileGrid.map_to_world(Vector2(5,3)))
+	_set_item_position($Food, [], Vector2(5,3))
 	$StarSlot.position = $TileGrid.map_to_world(Vector2(1,7))
 	$ChopSlot.position = $TileGrid.map_to_world(Vector2(1,2))
 	
@@ -31,8 +33,8 @@ func _on_debug_tile_flip(i, j, state):
 	debug_tiles[i][j].visible = state
 
 func _set_item_position(node, tiles_available, spawn_at = Vector2.ZERO):
-	var new_pos = spawn_at
-	var item_tile = Vector2.ZERO
+	var new_pos   = $TileGrid.map_to_world(spawn_at)
+	var item_tile = spawn_at
 	while not new_pos:
 		var new_x = randi() % 8 + 1
 		var new_y = randi() % 8 + 1
@@ -43,12 +45,18 @@ func _set_item_position(node, tiles_available, spawn_at = Vector2.ZERO):
 			break
 	node.position = new_pos
 	node.visible = true
+
+	print("setting current tile for ", node.name, ": ", item_tile)
+	node.set_meta("current_tile", item_tile)
+	
 	return item_tile
 
 func move_item(node, tiles_available):
+	if node.visible:
+		print("getting current tile for ", node.name)
+		emit_signal("item_tile_available", node.get_meta("current_tile"))
 	var tile = _set_item_position(node, tiles_available)
-	# This doesn't work not least because tiles_available is generated from scratch >_<
-	tiles_available[tile.x][tile.y] = false
+	emit_signal("item_tile_occupied", tile)
 
 func _on_snake_collide(p):
 	collected += 1
@@ -64,7 +72,6 @@ func _on_snake_collide(p):
 			if p.state.rainbow_part_count >= 2:
 				$Exit.position = $TileGrid.map_to_world(Vector2(4, 1))
 	if not $Star.visible:
-		$Star.visible = true
 		move_item($Star, p.tiles_available)
 		$StarTimer.start()
 	if collected % 3 == 0:

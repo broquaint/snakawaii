@@ -11,6 +11,8 @@ func _ready():
 	$Grid.connect("grid_star_slot", $Snake, "_on_grid_star_slot")
 	$Grid.connect("grid_chop_slot", $Snake, "_on_grid_chop_slot")
 	$Grid.connect("grid_exit_slot", $Snake, "_on_grid_exit_slot")
+	$Grid.connect("item_tile_available", $Snake, "_on_item_tile_available")
+	$Grid.connect("item_tile_occupied",  $Snake, "_on_item_tile_occupied")
 	connect("score_update", $GUI, "_on_score_change")
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

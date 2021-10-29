@@ -14,9 +14,3 @@ script = ExtResource( 3 )
 
 [node name="Snake" parent="." instance=ExtResource( 2 )]
 position = Vector2( 44.4569, 109.025 )
-
-[node name="Timer" type="Timer" parent="."]
-wait_time = 0.5
-autostart = true
-
-[connection signal="timeout" from="Timer" to="Snake" method="_on_Timer_timeout"]

@@ -17,7 +17,6 @@ position = Vector2( 0.235001, 6.34494 )
 shape = SubResource( 1 )
 
 [node name="BodyPart" type="KinematicBody2D" parent="."]
-visible = false
 script = ExtResource( 3 )
 
 [node name="Sprite" type="Sprite" parent="BodyPart"]
