@@ -46,14 +46,12 @@ func _set_item_position(node, tiles_available, spawn_at = Vector2.ZERO):
 	node.position = new_pos
 	node.visible = true
 
-	print("setting current tile for ", node.name, ": ", item_tile)
 	node.set_meta("current_tile", item_tile)
 	
 	return item_tile
 
 func move_item(node, tiles_available):
 	if node.visible:
-		print("getting current tile for ", node.name)
 		emit_signal("item_tile_available", node.get_meta("current_tile"))
 	var tile = _set_item_position(node, tiles_available)
 	emit_signal("item_tile_occupied", tile)
@@ -65,15 +63,16 @@ func _on_snake_collide(p):
 			move_item($Food, p.tiles_available)
 		"Star":
 			move_item($Star, p.tiles_available)
-			$StarTimer.start()
+			$Star.modulate = Color(1,1,1,1)
+			$StarTimer.start(1.5)
 		"Rainbow":
 			# If we reach here then this is the 3rd rainbow item
 			# but it hasn't been added to the snake yet.
 			if p.state.rainbow_part_count >= 2:
 				$Exit.position = $TileGrid.map_to_world(Vector2(4, 1))
-	if not $Star.visible:
+	if not $Star.visible and $StarTimer.time_left == 0:
 		move_item($Star, p.tiles_available)
-		$StarTimer.start()
+		$StarTimer.start(1.5)
 	if collected % 3 == 0:
 		move_item($Rainbow, p.tiles_available)
 	else:
@@ -88,5 +87,21 @@ func _on_snake_tile_change(snake):
 		emit_signal("grid_exit_slot")
 
 func _on_star_timeout():
-	$Star.position = Vector2(-128,-128)
-	$Star.visible = false
+	var timer = $StarTimer
+	# Need to stringify as match on floats doesn't seem to work ;_;
+	match str(timer.wait_time):
+		"1.5":
+			$Star.modulate = Color(1,1,1,0.3)
+			timer.start(0.4)
+		"0.4":
+			$Star.modulate = Color(1,1,1,1)
+			timer.start(1.2)
+		"1.2":
+			$Star.modulate = Color(1,1,1,0.3)
+			timer.start(0.3)
+		"0.3":
+			$Star.modulate = Color(1,1,1,1)
+			timer.start(0.75)
+		"0.75":
+			$Star.position = Vector2(-128,-128)
+			$Star.visible = false

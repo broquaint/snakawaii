@@ -120,5 +120,5 @@ texture = ExtResource( 9 )
 offset = Vector2( 32, 32 )
 
 [node name="StarTimer" type="Timer" parent="."]
-wait_time = 3.142
+wait_time = 1.5
 one_shot = true

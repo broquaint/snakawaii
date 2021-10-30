@@ -3,17 +3,18 @@ extends KinematicBody2D
 export (PackedScene) var Grid
 export (PackedScene) var SnakeBody
 
-export (int) var speed = 200
+export (int) var speed = 150
 
 signal snake_collide(node_name, tiles_available)
 signal snake_turn(direction, on_tile)
 signal snake_tile_change(new_tile, old_tile)
 signal debug_tile_flip(i, j, state)
+signal snake_move_queued(move)
 
-var velocity_up    = Vector2(0, -150)
-var velocity_down  = Vector2(0, 150)
-var velocity_right = Vector2(150, 0)
-var velocity_left  = Vector2(-150, 0)
+var velocity_up    = Vector2(0, -speed)
+var velocity_down  = Vector2(0, speed)
+var velocity_right = Vector2(speed, 0)
+var velocity_left  = Vector2(-speed, 0)
 
 var velocity = velocity_right
 
@@ -58,19 +59,21 @@ func _ready():
 
 func get_input():
 	if Input.is_action_just_pressed("right"):
-		return velocity_right
+		return {velocity=velocity_right,direction="right"}
 	if Input.is_action_just_pressed("left"):
-		return velocity_left
+		return {velocity=velocity_left,direction="left"}
 	if Input.is_action_just_pressed("down"):
-		return velocity_down
+		return {velocity=velocity_down,direction="down"}
 	if Input.is_action_just_pressed("up"):
-		return velocity_up
+		return {velocity=velocity_up,direction="up"}
 	return null
 
 func handle_movement():
 	var new_vel = get_input()
 	if new_vel != null:
-		moves.push_back(new_vel)
+		moves.push_back(new_vel.velocity)
+		emit_signal("snake_move_queued", new_vel)
+
 	var next_tile = on_tile(Vector2(global_position.x+dir_map[velocity].x,global_position.y+dir_map[velocity].y))
 	var cur_tile = on_tile(global_position)
 	if not moves.empty() and moves.back() != velocity and next_tile != cur_tile:
