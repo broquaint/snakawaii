@@ -42,6 +42,7 @@ __meta__ = {
 }
 
 [node name="DebugPos" type="Label" parent="DebugTile"]
+visible = false
 margin_right = 40.0
 margin_bottom = 14.0
 

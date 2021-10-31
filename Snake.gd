@@ -10,6 +10,7 @@ signal snake_turn(direction, on_tile)
 signal snake_tile_change(new_tile, old_tile)
 signal debug_tile_flip(i, j, state)
 signal snake_move_queued(move)
+signal snake_game_over()
 
 var velocity_up    = Vector2(0, -speed)
 var velocity_down  = Vector2(0, speed)
@@ -23,10 +24,7 @@ var body_parts = []
 var prev_tile: Vector2
 var moves = []
 
-var state = {
-	tiles_seen = 0,
-	tiles_entered = []
-}
+var state
 
 var occupied_item_tiles: Array
 var occupied_tiles: Array
@@ -44,10 +42,21 @@ func _ready():
 	dir_map[velocity_right] = Vector2(4, 0)
 	dir_map[velocity_left] = Vector2(-4, 0)
 	
+	connect("snake_collide", self, "_on_collide_add_body_part")
+	
+	start_game()
+	
+func start_game():
 	position.x = 64
 	position.y = 96
+	velocity = velocity_right
 	prev_tile = on_tile(position)
-	connect("snake_collide", self, "_on_collide_add_body_part")
+	moves = []
+	
+	state = {
+		tiles_seen = 0,
+		tiles_entered = []
+	}
 	
 	# Track item tiles separately as they change out of band.
 	occupied_item_tiles = []
@@ -56,6 +65,15 @@ func _ready():
 		for j in range(0, 16):
 			occupied_item_tiles[i][j] = true
 	occupied_tiles = free_tiles()
+
+	for part in body_parts:
+		part.free()
+
+	body_parts = []
+	
+func _on_game_start():
+	print("restarting...")
+	start_game()
 
 func get_input():
 	if Input.is_action_just_pressed("right"):
@@ -103,12 +121,10 @@ func track_tiles(cur_tile):
 	state.tiles_entered.push_front(cur_tile)
 
 func _process(_delta):
-	#handle_movement()
-	
 	var cur_tile = on_tile(global_position)
 	if prev_tile != cur_tile:
 		track_tiles(cur_tile)
-	
+
 	for i in range(0, occupied_tiles.size() - 1):
 		for j in range(0, occupied_tiles[i].size() - 1):
 			emit_signal("debug_tile_flip", i, j, occupied_tiles[i][j])
@@ -125,6 +141,10 @@ func _physics_process(delta):
 	move_and_collide(velocity * delta)
 
 func _on_collide_add_body_part(p):
+	if "Part".is_subsequence_of(p.collided_with):
+		emit_signal("snake_game_over")
+		return
+
 	var body_part = build_body_part_for(p.collided_with)
 
 	var base = self if body_parts.empty() else body_parts.back()
@@ -161,8 +181,6 @@ func body_part_based_on(body_part, base):
 	body_part.position = base.position
 	if not body_parts.empty():
 		body_part.turns = base.turns.duplicate(true)
-		#if body_part.turns.empty() and base.last_turn != null:
-		#	body_part.turns = [base.last_turn]	
 
 	body_part.tile_grid = Grid.instance().get_node("TileGrid")
 	body_part.dir_offset_map = dir_offset_map
@@ -181,16 +199,15 @@ func _on_grid_star_slot():
 	for idx in range(new_parts.size()):
 		var np = new_parts[idx]
 		var op = body_parts[idx]
-		print("at ", idx, " basing ", np.name, " on ", op.name)
 		body_part_based_on(np, op)
 
 	for part in body_parts:
 		part.free()
 	for part in new_parts:
 		get_tree().get_root().add_child(part)
-		print("child ", part.name, " v ", part.velocity, " at ", part.position, " turns ", part.turns)
 
 	body_parts = new_parts
+	# Handle when the head has turned on this tile.
 	if not body_parts.empty() and not moves.empty():
 		var fbp = body_parts[0]
 		fbp.velocity = velocity
@@ -217,7 +234,6 @@ func _on_grid_chop_slot():
 		var np = new_parts[idx]
 		var op = body_parts[idx]
 		body_part_based_on(np, op)
-		
 
 	for part in body_parts:
 		part.free()

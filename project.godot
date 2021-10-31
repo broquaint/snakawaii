@@ -14,9 +14,9 @@ config/name="Eggjam-snake-clone"
 run/main_scene="res://Main.tscn"
 config/icon="res://assets/KawaiiIcons_NoBG032.png"
 
-[global]
+[display]
 
-max_remote_stdout_chars_per_second=0
+window/size/width=600
 
 [input]
 

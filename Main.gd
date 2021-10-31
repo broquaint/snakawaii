@@ -8,6 +8,7 @@ func _ready():
 	$Snake.connect("snake_tile_change", $Grid, "_on_snake_tile_change")
 	$Snake.connect("snake_tile_change", self, "_on_snake_tile_change")
 	$Snake.connect("debug_tile_flip", $Grid, "_on_debug_tile_flip")
+	$Snake.connect("snake_game_over", $GUI, "_on_snake_game_over")
 	$Grid.connect("grid_star_slot", $Snake, "_on_grid_star_slot")
 	$Grid.connect("grid_chop_slot", $Snake, "_on_grid_chop_slot")
 	$Grid.connect("grid_exit_slot", $Snake, "_on_grid_exit_slot")
@@ -16,6 +17,8 @@ func _ready():
 	connect("score_update", $GUI, "_on_score_change")
 	$Snake.connect("snake_move_queued", $GUI, "_on_snake_move_queued")
 	$GUI.connect("game_paused", $Snake, "_on_game_paused")
+	$GUI.connect("game_start",  $Snake, "_on_game_start")
+	$GUI.connect("game_start",  $Grid, "_on_game_start")
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):

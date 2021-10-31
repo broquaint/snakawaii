@@ -30,7 +30,8 @@ func _ready():
 			debug_tiles[i][j] = tile
 
 func _on_debug_tile_flip(i, j, state):
-	debug_tiles[i][j].visible = state
+	pass
+	#debug_tiles[i][j].visible = state
 
 func _set_item_position(node, tiles_available, spawn_at = Vector2.ZERO):
 	var new_pos   = $TileGrid.map_to_world(spawn_at)
@@ -85,6 +86,7 @@ func _on_snake_tile_change(snake):
 		emit_signal("grid_chop_slot")
 	elif snake.new_tile == Vector2(4, 1) and snake.stats.rainbow_part_count >= 3:
 		emit_signal("grid_exit_slot")
+		emit_signal("item_tile_occupied", Vector2(4,1))
 
 func _on_star_timeout():
 	var timer = $StarTimer
