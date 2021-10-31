@@ -22,16 +22,13 @@ func handle_movement():
 	var next_tile = on_tile(Vector2(global_position.x+dir_map[velocity].x,global_position.y+dir_map[velocity].y))
 	var cur_tile  = on_tile(global_position)
 	if not turns.empty() and cur_tile.tile == turns[0].tile and next_tile.tile != cur_tile.tile:
-		print(self.name, " turning at ", cur_tile, " to ", next_tile)
+		# print(self.name, " turning at ", cur_tile, " to ", next_tile)
 		var turn = turns.pop_front()
-		print(self, " turn happening at ", turn, " on ", turn)
+		# print(self, " turn happening at ", turn, " on ", turn)
 		position.x = stepify(position.x, 32)
 		position.y = stepify(position.y, 32)
 		velocity = turn.direction
 		last_turn = turn
-
-func _process(_delta):
-	pass
 
 func _physics_process(delta):
 	handle_movement()
@@ -39,5 +36,5 @@ func _physics_process(delta):
 	move_and_collide(velocity * delta)
 
 func _on_snake_turn(direction, turn_tile):
-	turns.push_back({"direction":direction, "tile":turn_tile})
-	print(self, " turning at ", turns, " now on ", on_tile(position))
+	turns.append({"direction":direction, "tile":turn_tile})
+	# print(self, " turning at ", turns, " now on ", on_tile(position))

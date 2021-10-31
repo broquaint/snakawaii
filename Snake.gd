@@ -125,14 +125,7 @@ func _physics_process(delta):
 	move_and_collide(velocity * delta)
 
 func _on_collide_add_body_part(p):
-	var body_part
-	match p.collided_with:
-		"Food":
-			body_part = SnakeBody.instance().get_node("BodyPart").duplicate()
-		"Star":
-			body_part = SnakeBody.instance().get_node("StarPart").duplicate()
-		"Rainbow":
-			body_part = SnakeBody.instance().get_node("RainbowPart").duplicate()
+	var body_part = build_body_part_for(p.collided_with)
 
 	var base = self if body_parts.empty() else body_parts.back()
 	body_part_based_on(body_part, base)
@@ -143,17 +136,39 @@ func _on_collide_add_body_part(p):
 	get_tree().get_root().add_child(body_part)
 	body_part.visible = true
 
+func build_body_part_for(part_type):
+	match part_type:
+		"Food":
+			return SnakeBody.instance().get_node("BodyPart").duplicate()
+		"Star":
+			return SnakeBody.instance().get_node("StarPart").duplicate()
+		"Rainbow":
+			return SnakeBody.instance().get_node("RainbowPart").duplicate()
+	print("Didn't know what to do with ", part_type)
+
+func build_body_part_from(part):
+	if is_part(part, "Body"):
+		return build_body_part_for("Food")
+	elif is_part(part, "Star"):
+		return build_body_part_for("Star")
+	elif is_part(part, "Rainbow"):
+		return build_body_part_for("Rainbow")
+
+	print("Didn't know what to do with ", part)
+
 func body_part_based_on(body_part, base):
 	body_part.velocity = base.velocity
 	body_part.position = base.position
 	if not body_parts.empty():
 		body_part.turns = base.turns.duplicate(true)
-		if body_part.turns.empty() and base.last_turn != null:
-			body_part.turns = [base.last_turn]
-	
+		#if body_part.turns.empty() and base.last_turn != null:
+		#	body_part.turns = [base.last_turn]	
+
 	body_part.tile_grid = Grid.instance().get_node("TileGrid")
 	body_part.dir_offset_map = dir_offset_map
 	body_part.dir_map = dir_map
+
+	body_part.visible = true
 
 	connect("snake_turn", body_part, "_on_snake_turn")
 
@@ -161,19 +176,26 @@ func _on_grid_star_slot():
 	var new_parts = []
 	for part in body_parts:
 		if not is_part(part, "Star"):
-			new_parts.append(part.duplicate())
+			new_parts.append(build_body_part_from(part))
 
 	for idx in range(new_parts.size()):
 		var np = new_parts[idx]
 		var op = body_parts[idx]
+		print("at ", idx, " basing ", np.name, " on ", op.name)
 		body_part_based_on(np, op)
 
 	for part in body_parts:
 		part.free()
 	for part in new_parts:
 		get_tree().get_root().add_child(part)
+		print("child ", part.name, " v ", part.velocity, " at ", part.position, " turns ", part.turns)
 
 	body_parts = new_parts
+	if not body_parts.empty() and not moves.empty():
+		var fbp = body_parts[0]
+		fbp.velocity = velocity
+		if not fbp.turns.empty():
+			fbp.turns.pop_front()
 
 func _on_grid_chop_slot():
 	var choppable_count = 0
@@ -184,17 +206,18 @@ func _on_grid_chop_slot():
 	var parts_seen = 0
 	for part in body_parts:
 		if is_part(part, "Rainbow"):
-			new_parts.append(part.duplicate())
+			new_parts.append(build_body_part_from(part))
 		else:
 			# Drop about half the parts.
 			if not(parts_seen >= float(floor(choppable_count / 2))): 
-				new_parts.append(part.duplicate())
+				new_parts.append(build_body_part_from(part))
 			parts_seen += 1
 
 	for idx in range(new_parts.size()):
 		var np = new_parts[idx]
 		var op = body_parts[idx]
 		body_part_based_on(np, op)
+		
 
 	for part in body_parts:
 		part.free()
@@ -202,6 +225,12 @@ func _on_grid_chop_slot():
 		get_tree().get_root().add_child(part)
 
 	body_parts = new_parts
+	# Handle when the head has turned on this tile.
+	if not body_parts.empty() and not moves.empty():
+		var fbp = body_parts[0]
+		fbp.velocity = velocity
+		if not fbp.turns.empty():
+			fbp.turns.pop_front()
 
 func _on_grid_exit_slot():
 	print("Exit level code goes here \\o/")
@@ -246,7 +275,7 @@ func free_tiles() -> Array:
 			all_tiles[i][j] = occupied_item_tiles[i][j]
 
 	var cur_tile = on_tile(position)
-	all_tiles[cur_tile.x][cur_tile.y] = false
+	all_tiles[cur_tile.x][cur_tile.y] = false 
 
 	var te_end = body_parts.size() + 1 if body_parts.size() + 1 < state.tiles_entered.size() else body_parts.size()
 	var on_tiles = state.tiles_entered.slice(0, te_end)
