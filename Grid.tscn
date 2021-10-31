@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://MovementGrid.gd" type="Script" id=1]
 [ext_resource path="res://assets/KawaiiIcons_NoBG031.png" type="Texture" id=2]
@@ -29,8 +29,18 @@
 [sub_resource type="RectangleShape2D" id=2]
 extents = Vector2( 32.0261, 31.8582 )
 
+[sub_resource type="RectangleShape2D" id=3]
+extents = Vector2( 26.4517, 326.979 )
+
+[sub_resource type="RectangleShape2D" id=4]
+extents = Vector2( 302.412, 20.3901 )
+
 [node name="Grid" type="Node"]
 script = ExtResource( 4 )
+__meta__ = {
+"_edit_horizontal_guides_": [ 64.0, 599.646, 576.037 ],
+"_edit_vertical_guides_": [ 600.142, 576.278 ]
+}
 
 [node name="DebugTile" type="ColorRect" parent="."]
 visible = false
@@ -123,3 +133,27 @@ offset = Vector2( 32, 32 )
 [node name="StarTimer" type="Timer" parent="."]
 wait_time = 1.5
 one_shot = true
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+position = Vector2( -26.2858, 326.815 )
+shape = SubResource( 3 )
+
+[node name="RightWall" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
+position = Vector2( 602.843, 326.203 )
+shape = SubResource( 3 )
+
+[node name="TopWall" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TopWall"]
+position = Vector2( 299.099, 43.1846 )
+shape = SubResource( 4 )
+
+[node name="BottomWall" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BottomWall"]
+position = Vector2( 299.099, 596.405 )
+shape = SubResource( 4 )

@@ -72,7 +72,6 @@ func start_game():
 	body_parts = []
 	
 func _on_game_start():
-	print("restarting...")
 	start_game()
 
 func get_input():
@@ -141,7 +140,7 @@ func _physics_process(delta):
 	move_and_collide(velocity * delta)
 
 func _on_collide_add_body_part(p):
-	if "Part".is_subsequence_of(p.collided_with):
+	if "Part".is_subsequence_of(p.collided_with) or "Wall".is_subsequence_of(p.collided_with):
 		emit_signal("snake_game_over")
 		return
 

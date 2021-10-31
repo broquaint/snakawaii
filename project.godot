@@ -16,7 +16,8 @@ config/icon="res://assets/KawaiiIcons_NoBG032.png"
 
 [display]
 
-window/size/width=600
+window/size/width=577
+window/size/height=577
 
 [input]
 
