@@ -17,9 +17,9 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="GUI" parent="." instance=ExtResource( 1 )]
-
 [node name="Grid" parent="." instance=ExtResource( 4 )]
 
 [node name="Snake" parent="." instance=ExtResource( 2 )]
 position = Vector2( 44.4569, 109.025 )
+
+[node name="GUI" parent="." instance=ExtResource( 1 )]

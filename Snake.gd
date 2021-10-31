@@ -74,22 +74,23 @@ func start_game():
 func _on_game_start():
 	start_game()
 
-func get_input():
-	if Input.is_action_just_pressed("right"):
-		return {velocity=velocity_right,direction="right"}
-	if Input.is_action_just_pressed("left"):
-		return {velocity=velocity_left,direction="left"}
-	if Input.is_action_just_pressed("down"):
-		return {velocity=velocity_down,direction="down"}
-	if Input.is_action_just_pressed("up"):
-		return {velocity=velocity_up,direction="up"}
-	return null
-
 func _on_game_paused():
 	var grid = Grid.instance().get_node("TileGrid")
 	for part in body_parts:
 		var tile =  grid.world_to_map(grid.to_local(part.position))
 		print(part.name, " at ", tile, "[", part.position, "] velocity ", part.velocity, " turns ", part.turns)
+
+
+func get_input():
+	if Input.is_action_just_pressed("right") and velocity != velocity_left:
+		return {velocity=velocity_right,direction="right"}
+	if Input.is_action_just_pressed("left") and velocity != velocity_right:
+		return {velocity=velocity_left,direction="left"}
+	if Input.is_action_just_pressed("down") and velocity != velocity_up:
+		return {velocity=velocity_down,direction="down"}
+	if Input.is_action_just_pressed("up") and velocity != velocity_down:
+		return {velocity=velocity_up,direction="up"}
+	return null
 
 func handle_movement():
 	var new_vel = get_input()

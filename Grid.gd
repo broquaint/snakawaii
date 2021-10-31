@@ -34,13 +34,13 @@ func _on_game_start():
 func start_game():
 	_set_item_position($Food, [], Vector2(5,3))
 	collected = 0
-	
+
 	$Star.position = STAR_OFFSCREEN_TILE
 	$Star.visible = false
 	$Rainbow.position = RAINBOW_OFFSCREEN_TILE
 	$Rainbow.visible = false
 	$StarTimer.stop()
-	
+
 	debug_tiles = []
 	for i in range(0, 10):
 		debug_tiles.append(range(0, 16))

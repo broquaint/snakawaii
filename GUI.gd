@@ -15,7 +15,7 @@ func _on_score_change(score_update):
 	# print("score now ", score, ", updating by ", score_update)
 	score += 1
 	score += score_update
-	$HUD/Score/Label.text = String(int(score))
+	$HUD/Score/Label.text = str(int(score))
 
 func _on_snake_move_queued(move):
 	var arrow
@@ -50,6 +50,7 @@ func _process(_delta):
 		$MsgContainer/Message.visible = false
 		emit_signal("game_start")
 		cur_game_state = game_state_playing
+		score = 0
 		root.paused = false
 
 func _on_snake_game_over():
