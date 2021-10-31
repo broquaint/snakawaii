@@ -18,7 +18,7 @@ func _ready():
 	$Snake.connect("snake_move_queued", $GUI, "_on_snake_move_queued")
 	$GUI.connect("game_paused", $Snake, "_on_game_paused")
 	$GUI.connect("game_start",  $Snake, "_on_game_start")
-	$GUI.connect("game_start",  $Grid, "_on_game_start")
+	$GUI.connect("game_start",  $Grid,  "_on_game_start")
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):

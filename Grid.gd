@@ -6,16 +6,42 @@ signal grid_exit_slot()
 signal item_tile_occupied(tile)
 signal item_tile_available(tile)
 
-var debug_tiles = []
+var debug_tiles
 
-var collected = 0
+const STAR_SLOT_TILE = Vector2(1,7)
+const CHOP_SLOT_TILE = Vector2(1,2)
+const EXIT_SLOT_TILE = Vector2(4,1)
+
+const STAR_OFFSCREEN_TILE = Vector2(-128,-128)
+const RAINBOW_OFFSCREEN_TILE = Vector2(-64, -128)
+
+var collected
 
 func _ready():
-	_set_item_position($Food, [], Vector2(5,3))
-	$StarSlot.position = $TileGrid.map_to_world(Vector2(1,7))
-	$ChopSlot.position = $TileGrid.map_to_world(Vector2(1,2))
-	
+	$StarSlot.position = $TileGrid.map_to_world(STAR_SLOT_TILE)
+	$ChopSlot.position = $TileGrid.map_to_world(CHOP_SLOT_TILE)
+
+	for tile in [STAR_SLOT_TILE, CHOP_SLOT_TILE, EXIT_SLOT_TILE]:
+		emit_signal("item_tile_occupied", tile)
+
 	$StarTimer.connect("timeout", self, "_on_star_timeout")
+	
+	start_game()
+
+func _on_game_start():
+	start_game()
+
+func start_game():
+	_set_item_position($Food, [], Vector2(5,3))
+	collected = 0
+	
+	$Star.position = STAR_OFFSCREEN_TILE
+	$Star.visible = false
+	$Rainbow.position = RAINBOW_OFFSCREEN_TILE
+	$Rainbow.visible = false
+	$StarTimer.stop()
+	
+	debug_tiles = []
 	for i in range(0, 10):
 		debug_tiles.append(range(0, 16))
 		for j in range(0, 16):
@@ -70,23 +96,23 @@ func _on_snake_collide(p):
 			# If we reach here then this is the 3rd rainbow item
 			# but it hasn't been added to the snake yet.
 			if p.state.rainbow_part_count >= 2:
-				$Exit.position = $TileGrid.map_to_world(Vector2(4, 1))
+				$Exit.position = $TileGrid.map_to_world(EXIT_SLOT_TILE)
 	if not $Star.visible and $StarTimer.time_left == 0:
 		move_item($Star, p.tiles_available)
 		$StarTimer.start(1.5)
 	if collected % 3 == 0:
 		move_item($Rainbow, p.tiles_available)
 	else:
-		$Rainbow.position = Vector2(-64, -128)
+		$Rainbow.position = RAINBOW_OFFSCREEN_TILE
 
 func _on_snake_tile_change(snake):
-	if snake.new_tile == Vector2(1,7):
+	if snake.new_tile == STAR_SLOT_TILE:
 		emit_signal("grid_star_slot")
-	elif snake.new_tile == Vector2(1,2):
+	elif snake.new_tile == CHOP_SLOT_TILE:
 		emit_signal("grid_chop_slot")
-	elif snake.new_tile == Vector2(4, 1) and snake.stats.rainbow_part_count >= 3:
+	elif snake.new_tile == EXIT_SLOT_TILE and snake.stats.rainbow_part_count >= 3:
 		emit_signal("grid_exit_slot")
-		emit_signal("item_tile_occupied", Vector2(4,1))
+		emit_signal("item_tile_occupied", EXIT_SLOT_TILE)
 
 func _on_star_timeout():
 	var timer = $StarTimer
@@ -105,5 +131,5 @@ func _on_star_timeout():
 			$Star.modulate = Color(1,1,1,1)
 			timer.start(0.75)
 		"0.75":
-			$Star.position = Vector2(-128,-128)
+			$Star.position = STAR_OFFSCREEN_TILE
 			$Star.visible = false
