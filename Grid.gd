@@ -93,6 +93,7 @@ func _on_snake_collide(p):
 			$Star.modulate = Color(1,1,1,1)
 			$StarTimer.start(1.5)
 		"Rainbow":
+			collected -= 1
 			# If we reach here then this is the 3rd rainbow item
 			# but it hasn't been added to the snake yet.
 			if p.state.rainbow_part_count >= 2:
@@ -100,7 +101,7 @@ func _on_snake_collide(p):
 	if not $Star.visible and $StarTimer.time_left == 0:
 		move_item($Star, p.tiles_available)
 		$StarTimer.start(1.5)
-	if collected % 3 == 0:
+	if collected % 3 == 0 and p.collided_with != "Rainbow":
 		move_item($Rainbow, p.tiles_available)
 	else:
 		$Rainbow.position = RAINBOW_OFFSCREEN_TILE
