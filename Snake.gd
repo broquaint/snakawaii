@@ -45,7 +45,7 @@ func _ready():
 	dir_map[velocity_left] = Vector2(-4, 0)
 	
 	position.x = 64
-	position.y = 64
+	position.y = 96
 	prev_tile = on_tile(position)
 	connect("snake_collide", self, "_on_collide_add_body_part")
 	
@@ -68,21 +68,28 @@ func get_input():
 		return {velocity=velocity_up,direction="up"}
 	return null
 
+func _on_game_paused():
+	var grid = Grid.instance().get_node("TileGrid")
+	for part in body_parts:
+		var tile =  grid.world_to_map(grid.to_local(part.position))
+		print(part.name, " at ", tile, "[", part.position, "] velocity ", part.velocity, " turns ", part.turns)
+
 func handle_movement():
 	var new_vel = get_input()
 	if new_vel != null:
-		moves.push_back(new_vel.velocity)
+		moves=[new_vel.velocity]
 		emit_signal("snake_move_queued", new_vel)
 
 	var next_tile = on_tile(Vector2(global_position.x+dir_map[velocity].x,global_position.y+dir_map[velocity].y))
 	var cur_tile = on_tile(global_position)
 	if not moves.empty() and moves.back() != velocity and next_tile != cur_tile:
 		var turn = moves.pop_back()
+		# Move to _physicss_process
 		position.x = stepify(position.x, 32)
 		position.y = stepify(position.y, 32)
 		velocity = turn
 		# Don't know why SnakeBody doesn't see the Grid PackScene; past caring
-		emit_signal("snake_turn", velocity, cur_tile, Grid.instance().get_node("TileGrid"), dir_offset_map, dir_map)
+		emit_signal("snake_turn", velocity, cur_tile)
 
 func track_tiles(cur_tile):
 	occupied_tiles = free_tiles()
@@ -96,7 +103,7 @@ func track_tiles(cur_tile):
 	state.tiles_entered.push_front(cur_tile)
 
 func _process(_delta):
-	handle_movement()
+	#handle_movement()
 	
 	var cur_tile = on_tile(global_position)
 	if prev_tile != cur_tile:
@@ -128,37 +135,38 @@ func _on_collide_add_body_part(p):
 			body_part = SnakeBody.instance().get_node("RainbowPart").duplicate()
 
 	var base = self if body_parts.empty() else body_parts.back()
-	body_part.velocity = base.velocity
+	body_part_based_on(body_part, base)
 	body_part.position.x = base.position.x + ( 64 if base.velocity == velocity_left else -64 if base.velocity == velocity_right else 0)
 	body_part.position.y = base.position.y + (-64 if base.velocity == velocity_down else 64  if base.velocity == velocity_up else 0)
 
+	body_parts.push_back(body_part)
+	get_tree().get_root().add_child(body_part)
+	body_part.visible = true
+
+func body_part_based_on(body_part, base):
+	body_part.velocity = base.velocity
+	body_part.position = base.position
 	if not body_parts.empty():
 		body_part.turns = base.turns.duplicate(true)
 		if body_part.turns.empty() and base.last_turn != null:
 			body_part.turns = [base.last_turn]
-		body_part.tile_grid = Grid.instance().get_node("TileGrid")
-		body_part.dir_offset_map = dir_offset_map
-		body_part.dir_map = dir_map
-	body_parts.push_back(body_part)
-	get_tree().get_root().add_child(body_part)
-	body_part.visible = true
+	
+	body_part.tile_grid = Grid.instance().get_node("TileGrid")
+	body_part.dir_offset_map = dir_offset_map
+	body_part.dir_map = dir_map
 
 	connect("snake_turn", body_part, "_on_snake_turn")
 
 func _on_grid_star_slot():
 	var new_parts = []
-	for idx in range(body_parts.size()):
-		var part = body_parts[idx]
+	for part in body_parts:
 		if not is_part(part, "Star"):
 			new_parts.append(part.duplicate())
 
 	for idx in range(new_parts.size()):
 		var np = new_parts[idx]
 		var op = body_parts[idx]
-		np.velocity = op.velocity
-		np.position = op.position
-		np.turns    = op.turns.duplicate()
-		connect("snake_turn", np, "_on_snake_turn")
+		body_part_based_on(np, op)
 
 	for part in body_parts:
 		part.free()
@@ -186,10 +194,7 @@ func _on_grid_chop_slot():
 	for idx in range(new_parts.size()):
 		var np = new_parts[idx]
 		var op = body_parts[idx]
-		np.velocity = op.velocity
-		np.position = op.position
-		np.turns    = op.turns.duplicate()
-		connect("snake_turn", np, "_on_snake_turn")
+		body_part_based_on(np, op)
 
 	for part in body_parts:
 		part.free()
@@ -229,7 +234,6 @@ func make_stats():
 		tiles_seen = state.tiles_seen,
 	}
 
-
 func free_tiles() -> Array:
 	var all_tiles = []
 	for i in range(0, 10):
@@ -258,8 +262,8 @@ func free_tiles() -> Array:
 func on_tile(pos) -> Vector2:
 	var grid = Grid.instance().get_node("TileGrid")
 	var real_pos = Vector2(
-		pos.x + dir_offset_map[velocity].x,
-		pos.y + dir_offset_map[velocity].y
+		floor(pos.x + dir_offset_map[velocity].x),
+		floor(pos.y + dir_offset_map[velocity].y)
 	)
 	$TilePos.global_position = grid.to_local(	real_pos)
 	return grid.world_to_map(grid.to_local(real_pos))

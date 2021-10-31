@@ -15,6 +15,7 @@ func _ready():
 	$Grid.connect("item_tile_occupied",  $Snake, "_on_item_tile_occupied")
 	connect("score_update", $GUI, "_on_score_change")
 	$Snake.connect("snake_move_queued", $GUI, "_on_snake_move_queued")
+	$GUI.connect("game_paused", $Snake, "_on_game_paused")
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
