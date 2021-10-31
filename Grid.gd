@@ -2,7 +2,7 @@ extends Node
 
 signal grid_star_slot()
 signal grid_chop_slot()
-signal grid_exit_slot()
+signal grid_exit_slot(tile)
 signal item_tile_occupied(tile)
 signal item_tile_available(tile)
 
@@ -10,7 +10,7 @@ var debug_tiles
 
 const STAR_SLOT_TILE = Vector2(1,7)
 const CHOP_SLOT_TILE = Vector2(1,2)
-const EXIT_SLOT_TILE = Vector2(4,1)
+const EXIT_SLOT_TILE = Vector2(7,2)
 
 const STAR_OFFSCREEN_TILE = Vector2(-128,-128)
 const RAINBOW_OFFSCREEN_TILE = Vector2(-64, -128)
@@ -22,7 +22,7 @@ func _ready():
 	$ChopSlot.position = $TileGrid.map_to_world(CHOP_SLOT_TILE)
 
 	for tile in [STAR_SLOT_TILE, CHOP_SLOT_TILE, EXIT_SLOT_TILE]:
-		emit_signal("item_tile_occupied", tile)
+		call_deferred("emit_signal", "item_tile_occupied", tile)
 
 	$StarTimer.connect("timeout", self, "_on_star_timeout")
 	
@@ -111,8 +111,7 @@ func _on_snake_tile_change(snake):
 	elif snake.new_tile == CHOP_SLOT_TILE:
 		emit_signal("grid_chop_slot")
 	elif snake.new_tile == EXIT_SLOT_TILE and snake.stats.rainbow_part_count >= 3:
-		emit_signal("grid_exit_slot")
-		emit_signal("item_tile_occupied", EXIT_SLOT_TILE)
+		emit_signal("grid_exit_slot", EXIT_SLOT_TILE)
 
 func _on_star_timeout():
 	var timer = $StarTimer

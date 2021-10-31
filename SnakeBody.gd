@@ -2,9 +2,15 @@ extends KinematicBody2D
 
 export (Vector2) var velocity = Vector2.ZERO
 
+const SNAKE_STATE_MOVING = "moving"
+const SNAKE_STATE_LEAVING = "leaving"
+
+onready var snake_state = SNAKE_STATE_MOVING
+
 var prev_tile: Vector2
 var turns = []
 var last_turn = null
+var exit_tile = null
 
 # Hacks because life is short
 var tile_grid = null
@@ -21,6 +27,7 @@ func on_tile(pos):
 func handle_movement():
 	var next_tile = on_tile(Vector2(global_position.x+dir_map[velocity].x,global_position.y+dir_map[velocity].y))
 	var cur_tile  = on_tile(global_position)
+
 	if not turns.empty() and cur_tile.tile == turns[0].tile and next_tile.tile != cur_tile.tile:
 		# print(self.name, " turning at ", cur_tile, " to ", next_tile)
 		var turn = turns.pop_front()
@@ -29,6 +36,8 @@ func handle_movement():
 		position.y = stepify(position.y, 32)
 		velocity = turn.direction
 		last_turn = turn
+	elif cur_tile.tile == exit_tile and snake_state == SNAKE_STATE_LEAVING:
+		queue_free()
 
 func _physics_process(delta):
 	handle_movement()
@@ -38,3 +47,7 @@ func _physics_process(delta):
 func _on_snake_turn(direction, turn_tile):
 	turns.append({"direction":direction, "tile":turn_tile})
 	# print(self, " turning at ", turns, " now on ", on_tile(position))
+
+func _on_snake_exitting(tile):
+	snake_state = SNAKE_STATE_LEAVING
+	exit_tile = tile

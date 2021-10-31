@@ -3,11 +3,11 @@ extends GridContainer
 signal game_paused()
 signal game_start()
 
-var game_state_over = "game_over"
-var game_state_paused = "paused"
-var game_state_playing = "playing"
+const GAME_STATE_OVER = "game_over"
+const GAME_STATE_PAUSED = "paused"
+const GAME_STATE_PLAYING = "playing"
 
-var cur_game_state = game_state_playing
+var cur_game_state = GAME_STATE_PLAYING
 
 var score = 0
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -35,21 +35,21 @@ func _on_snake_move_queued(move):
 
 func _process(_delta):
 	var root = get_tree()
-	if Input.is_action_just_pressed("ui_select") and cur_game_state != game_state_over:
+	if Input.is_action_just_pressed("ui_select") and cur_game_state != GAME_STATE_OVER:
 		emit_signal("game_paused")
 		root.paused = !root.paused
 		if root.paused:
-			cur_game_state = game_state_paused
+			cur_game_state = GAME_STATE_PAUSED
 			$MsgContainer/Message.text = "Paused"
 			$MsgContainer/Message.visible = true
 		else:
-			cur_game_state = game_state_playing
+			cur_game_state = GAME_STATE_PLAYING
 			$MsgContainer/Message.visible = false
 
-	if Input.is_action_just_pressed("ui_accept") and cur_game_state == game_state_over:
+	if Input.is_action_just_pressed("ui_accept") and cur_game_state == GAME_STATE_OVER:
 		$MsgContainer/Message.visible = false
 		emit_signal("game_start")
-		cur_game_state = game_state_playing
+		cur_game_state = GAME_STATE_PLAYING
 		score = 0
 		root.paused = false
 
@@ -57,4 +57,4 @@ func _on_snake_game_over():
 	get_tree().paused = true
 	$MsgContainer/Message.text = "Game over!"
 	$MsgContainer/Message.visible = true
-	cur_game_state = game_state_over
+	cur_game_state = GAME_STATE_OVER

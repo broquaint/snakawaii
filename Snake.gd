@@ -11,6 +11,12 @@ signal snake_tile_change(new_tile, old_tile)
 signal debug_tile_flip(i, j, state)
 signal snake_move_queued(move)
 signal snake_game_over()
+signal snake_exitting(tile)
+
+const SNAKE_STATE_MOVING = "moving"
+const SNAKE_STATE_LEAVING = "leaving"
+
+var snake_state
 
 var velocity_up    = Vector2(0, -speed)
 var velocity_down  = Vector2(0, speed)
@@ -47,6 +53,7 @@ func _ready():
 	start_game()
 	
 func start_game():
+	snake_state = SNAKE_STATE_MOVING
 	position.x = 64
 	position.y = 96
 	velocity = velocity_right
@@ -75,10 +82,11 @@ func _on_game_start():
 	start_game()
 
 func _on_game_paused():
-	var grid = Grid.instance().get_node("TileGrid")
-	for part in body_parts:
-		var tile =  grid.world_to_map(grid.to_local(part.position))
-		print(part.name, " at ", tile, "[", part.position, "] velocity ", part.velocity, " turns ", part.turns)
+	pass
+	#var grid = Grid.instance().get_node("TileGrid")
+	#for part in body_parts:
+	#	var tile =  grid.world_to_map(grid.to_local(part.position))
+	#	print(part.name, " at ", tile, "[", part.position, "] velocity ", part.velocity, " turns ", part.turns)
 
 
 func get_input():
@@ -130,7 +138,11 @@ func _process(_delta):
 			emit_signal("debug_tile_flip", i, j, occupied_tiles[i][j])
 
 func _physics_process(delta):
+	if snake_state == SNAKE_STATE_LEAVING:
+		return
+
 	handle_movement()
+
 	var collision = move_and_collide(velocity * (delta + 0.1), true, true, true)
 	if collision:
 		emit_signal("snake_collide", {
@@ -189,6 +201,7 @@ func body_part_based_on(body_part, base):
 	body_part.visible = true
 
 	connect("snake_turn", body_part, "_on_snake_turn")
+	connect("snake_exitting", body_part, "_on_snake_exitting")
 
 func _on_grid_star_slot():
 	var new_parts = []
@@ -248,8 +261,11 @@ func _on_grid_chop_slot():
 		if not fbp.turns.empty():
 			fbp.turns.pop_front()
 
-func _on_grid_exit_slot():
-	print("Exit level code goes here \\o/")
+func _on_grid_exit_slot(tile):
+	snake_state = SNAKE_STATE_LEAVING
+	visible = false
+	position = Vector2(-256,-256)
+	emit_signal("snake_exitting", tile)
 
 func _on_item_tile_available(tile):
 	occupied_tiles[tile.x][tile.y] = true
